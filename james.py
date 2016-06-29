@@ -23,7 +23,6 @@ def dataClean(filename):
     df['churn'] = datetime(2014, 7, 1) - df['last_trip_date'] > timedelta(days=30)
     df['days_of_signed'] = (datetime(2014,7,1) - df['signup_date'])
     df['days_of_signed'] = df['days_of_signed'].apply(lambda x: x.days)
-    df.rename(columns={'True': 'Luxury_car_user', 'False': 'Non_luxury_car_user'}, inplace=True)
     df = df.drop(['phone', 'city', 'signup_date', 'last_trip_date'], axis=1)
     return df
 
