@@ -69,8 +69,17 @@ def score(y_true, y_pred):
 
 def KNN(X, y):
     knnMod = KNeighborsClassifier()
-    parms
-    pass
+    parms = {'n_neighbors':[3,5,10, 15],
+                'weights':['uniform', 'distance'],
+                'n_jobs' : [-1]}
+    gsMod = GridSearchCV(estimator=knnMod, param_grid=parms, n_jobs=-1, cv=10, verbose=2)
+    gsMod.fit(X, y)
+    best_parms = gsMod.best_params_
+    best_score = gsMod.best_score_
+    print best_parms
+    # print 'scores:', gdMod.grid_scores_
+    print best_score
+    return gsMod.best_estimator_
 
 def randomForest(X, y):
     rf = RandomForestClassifier()
@@ -82,19 +91,36 @@ def randomForest(X, y):
     gsMod = GridSearchCV(estimator=rf, param_grid=parms, n_jobs=-1, cv=10, verbose=2)
     gsMod.fit(X, y)
     best_parms = gsMod.best_params_
-    print 'scores:', gdMod.grid_scores_
     best_score = gsMod.best_score_
+    print best_parms
+    # print 'scores:', gdMod.grid_scores_
+    print best_score
     return gsMod.best_estimator_
+
+def plotfeature(X, y, names):
+
+    for i in xrange(X.shape[1]):
+        plt.figure()
+        plt.scatter(X[:,i], y, label=names[i])
+        plt.legend(loc='center')
+
 
 
 if __name__ == '__main__':
-   df = dataClean('data/churn.csv')
-   y = df['churn'].values.astype(int)
-   X = df.drop(['churn'], axis=1).values
-   scaler = StandardScaler()
-   X_scaled= scaler.fit_transform(X)
-   X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2)
-   # print decisionTree(X_train, X_test, y_train, y_test) (edited)
-   bestRF = randomForest(X_train, y_train)
-   # print X_scaled
-   plt.show()
+    df = dataClean('data/churn.csv')
+    y = df['churn'].values.astype(int)
+    X = df.drop(['churn'], axis=1).values
+    scaler = StandardScaler()
+    X_scaled= scaler.fit_transform(X)
+    names = df.drop(['churn'], axis=1).columns
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y,  test_size=0.2)
+    # print decisionTree(X_train, X_test, y_train, y_test) (edited)
+    # bestRF = randomForest(X_train, y_train)
+    # {'max_features': 4, 'n_estimators': 300, 'oob_score': True, 'n_jobs': -1, 'criterion': 'entropy'}
+    # 0.7716
+    # print X_scaled
+    # besrKNN = KNN(X_train, y_train)
+    # {'n_neighbors': 15, 'n_jobs': -1, 'weights': 'uniform'}
+    #   0.7568
+    plotfeature(X, y, names)
+    plt.show()
