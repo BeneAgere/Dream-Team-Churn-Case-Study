@@ -1,14 +1,16 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from sklearn.metrics import mean_squared_error
-from sklearn-metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score
 from sklearn.metrics import r2_score
-from sklearn.preprocessing import StandardScale
+from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 
 def dataClean(filename):
-    df = pd.read_csv('churn.csv',parse_dates=['last_trip_date','signup_date'])
+    df = pd.read_csv(filename, parse_dates=['last_trip_date','signup_date'])
     avg_by_driver = df['avg_rating_by_driver'].sum()*1.0/len(df['avg_rating_by_driver'])
     df['avg_rating_by_driver'] = df['avg_rating_by_driver'].fillna(avg_by_driver)
     avg_of_driver = df['avg_rating_of_driver'].sum()*1.0/len(df['avg_rating_of_driver'])
@@ -18,7 +20,8 @@ def dataClean(filename):
     df['churn'] = datetime(2014, 7, 1) - df['last_trip_date'] > timedelta(days=30)
     df['days_of_signed'] = (datetime(2014,7,1) - df['signup_date'])
     df['days_of_signed'] = df['days_of_signed'].apply(lambda x: x.days)
-    df = df.drop(['luxury_car_user', 'phone', 'city'], axis=1)
+    df.rename(columns={'True': 'Luxury_car_user', 'False': 'Non_luxury_car_user'}, inplace=True)
+    df = df.drop(['luxury_car_user', 'phone', 'city', 'signup_date', 'last_trip_date'], axis=1)
     return df
 
 def confusion_matrix(y_true, y_predict):
@@ -41,14 +44,15 @@ def score(y_true, y_pred):
     return mse, r2, auc
 
 def KNN(X, y):
-
+    pass
 
 if __name__ == '__main__':
-   df = dataClean()
-   y = df['churn']
-   X = df.drop('churn')
-   X_scaled, y_scaled = StandardScale().fit_transform(X, y)
-   X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=0.2)
+   df = dataClean('data/churn.csv')
+   y = df['churn'].values.astype(int)
+   X = df.drop(['churn'], axis=1).values
+   scaler = StandardScaler()
+   X_scaled= scaler.fit_transform(X)
+   X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2)
    # print decisionTree(X_train, X_test, y_train, y_test) (edited)
-
+   print X_scaled
    plt.show()
